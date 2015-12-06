@@ -1,16 +1,13 @@
 import csv
 import re
-import nltk.data
 from sets import Set
 import sys
 from collections import Counter, defaultdict
-import string
 from math import log
-from nltk.tokenize import sent_tokenize, word_tokenize
-from nltk import FreqDist
-from nltk.stem import PorterStemmer, WordNetLemmatizer
 import time
-from nltk.tokenize import PunktWordTokenizer, WordPunctTokenizer
+
+from nltk.stem import PorterStemmer, WordNetLemmatizer
+from nltk.tokenize import WordPunctTokenizer
 from nltk.util import ngrams
 
 reload(sys)
@@ -115,7 +112,7 @@ def train():
     kombo_reci_kategorije = defaultdict(Counter)
     ##broji koliko se svaka rec pojavljuje u nekoj kategoriji pr. :
     # 'good':{positive:456, negative:23, neutral:34}
-    all_words = Counter()
+    all_words = Counter() # counts occurrence of all words in training set
     categories = Counter()
 
     with open(training_data, 'rb') as tsvin:

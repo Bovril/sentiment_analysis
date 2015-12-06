@@ -1,19 +1,15 @@
 import csv
 import re
-import nltk.data
 from sets import Set
 import sys
 from collections import Counter, defaultdict
 
 reload(sys)
 sys.setdefaultencoding('utf8')
-import pickle
-from nltk.tokenize import sent_tokenize, word_tokenize, PunktWordTokenizer
-from nltk import FreqDist
+from nltk.tokenize import PunktWordTokenizer
 from nltk.stem import PorterStemmer, WordNetLemmatizer
 import time
 from math import log
-import pylab
 from nltk.util import ngrams
 import string
 
@@ -76,6 +72,7 @@ def sanitizer(tweet, stemmatizer):
     tweet_trimed_hash_at = tweet_trimed_hash_at.translate(None, string.punctuation)
 
     tweet_token = tokenizer.tokenize(tweet_trimed_hash_at.decode('ISO-8859-1'))
+
 
     is_upper = []
     tweet_sanitized = [word.lower() for word in tweet_token if word not in stop_words]

@@ -1,24 +1,20 @@
 # /usr/lib/python
+import time
+import re
+from sets import Set
+
 import numpy as np
 import pandas as pd
 import sklearn.cross_validation
 import sklearn.feature_extraction.text
 import sklearn.metrics
 import sklearn.naive_bayes
-from sklearn import svm
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.svm import LinearSVC
-from sklearn.tree import DecisionTreeClassifier
-import nltk.data
-from nltk.tokenize import sent_tokenize, word_tokenize, PunktWordTokenizer
+from nltk.tokenize import PunktWordTokenizer
 from nltk.stem import PorterStemmer, WordNetLemmatizer
-from numpy import array
-import time
-import re
-from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.stem import PorterStemmer, WordNetLemmatizer
 from nltk.tokenize import PunktWordTokenizer, WordPunctTokenizer
-from sets import Set
 
 start_time = time.time()
 
@@ -95,7 +91,7 @@ train_data, test_data = pd.DataFrame(train, columns=names), pd.DataFrame(test, c
 
 # vectorization is the process of converting all names into a binary vector
 
-from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 vectorizer = TfidfVectorizer(stop_words=stop_words,
                              ngram_range=(1, 2),
@@ -126,9 +122,6 @@ neutral_cases_test = (test_data['label'] == 'neutral')
 # ratio imbalance
 
 # train
-from sklearn.linear_model import LogisticRegression
-from sklearn.linear_model import SGDClassifier
-from sklearn.ensemble import RandomForestClassifier
 
 classifier = OneVsRestClassifier(LinearSVC())
 # classifier = OneVsRestClassifier(sklearn.naive_bayes.MultinomialNB())
