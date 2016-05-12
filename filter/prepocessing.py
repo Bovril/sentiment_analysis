@@ -3,6 +3,8 @@ import re
 from nltk.stem import PorterStemmer, WordNetLemmatizer
 from nltk.tokenize import WordPunctTokenizer
 from nltk.util import ngrams as nltk_ngrams
+import sys
+import types
 
 REGEX_PATTERNS = [
     ('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+',
@@ -18,27 +20,29 @@ REGEX_PATTERNS = [
     ("#[a-zA-Z]+", '')
 ]
 
+if sys.version_info[0] > 2:  # Python 3+
+    create_bound_method = types.MethodType
+else:
+    def create_bound_method(func, obj):
+        return types.MethodType(func, obj, obj.__class__)
+
 class Filter:
     tokenizer = WordPunctTokenizer()
-    lemma = WordNetLemmatizer()
-    stemm = PorterStemmer()
-
 
     def __init__(self,
                  tweet,
                  ngram_combo=[],
                  stop_words=[],
                  patterns=[],
-                 word_base_method='stemm'
+                 func=None
                  ):
-        self.word_base_method = word_base_method
         self.tweet = tweet
         self.ngram_combo = ngram_combo
         self.stop_words = stop_words
         self.patterns = [(re.compile(pattern), replacer)
                          for (pattern, replacer) in patterns]
-        self.word_base_coices = {'stemm': self.stemmatize,
-                                 'lemm': self.lemmatize}
+        if func:
+            self.word_base_method = create_bound_method(func, self)
 
     def get_tweet(self):
         return self.tweet
@@ -55,7 +59,6 @@ class Filter:
         for (pattern, replacer) in self.patterns:
             (tweet, count) = re.subn(pattern, replacer, tweet)
 
-        # tweet = tweet.translate(None, string.punctuation)
         return tweet
 
     def get_sub_tweet(self):
@@ -72,29 +75,29 @@ class Filter:
         return [word.lower()
                 for word in tokenized_tweet if word.lower() not in self.stop_words]
 
-    def lemmatize(self):
-
-        return [Filter.lemma.lemmatize(word)
-                for word in self.tokenize()]
-
-    def stemmatize(self):
-
-        return [Filter.stemm.stem(word)
-                for word in self.tokenize()]
-
-    def join_tweet(self, bag_of_words):
-
-        return ' '.join(bag_of_words)
-
-        # ngram_tvit = self.ngramz(tweet_obradjen, ngram_broj)
-        return self.ngramize()
+    def word_base_method(self):
+        return self.tokenize()
 
     def __call__(self):
         """
         :return: a list of n-grams
         """
+        if len(self.ngram_combo) == 1 and sorted(self.ngram_combo)[0] == 1:
+            return self.word_base_method()
 
-        return self.lemmatize()
+        print 'this'
+        return self.ngramize(" ".join(self.word_base_method()))
+
+
+def lemmatize(self):
+    lemma = WordNetLemmatizer()
+    return [lemma.lemmatize(word)
+            for word in self.tokenize()]
+
+def stemmatize(self):
+    stemm = PorterStemmer()
+    return [stemm.stem(word)
+            for word in self.tokenize()]
 
 
 if __name__ == "__main__":
@@ -104,5 +107,7 @@ if __name__ == "__main__":
     filter_ = Filter(tweet=tweet_,
                      ngram_combo=[1, 2, 3],
                      stop_words=stop_words,
-                     patterns=REGEX_PATTERNS)
+                     patterns=REGEX_PATTERNS,
+                     func=stemmatize,
+                     )
     print filter_()
