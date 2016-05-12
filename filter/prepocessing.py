@@ -1,23 +1,23 @@
 import re
+import sys
+import types
 
 from nltk.stem import PorterStemmer, WordNetLemmatizer
 from nltk.tokenize import WordPunctTokenizer
 from nltk.util import ngrams as nltk_ngrams
-import sys
-import types
 
 REGEX_PATTERNS = [
     ('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+',
      'url'),
-    (':\)|:-\)|:D|:-\]', 'good good'),
-    (':\(|:\[|:\|', 'bad bad'),
-    ('\d+.\d+|\d+|\d+th', 'number'),
-    ('/^\d*\.?\d*$/', 'number'),
-    ('/^\d*\-?\d*$/', 'number'),
-    ('@[^\s]+', 'atuser'),
-    ("[\(\)&,.:!?`~-]+", ''),
-    ("(?<=^|(?<=[^a-zA-Z0-9-_\.]))@([A-Za-z]+[A-Za-z0-9]+)", ''),
-    ("#[a-zA-Z]+", '')
+    # (':\)|:-\)|:D|:-\]', 'good good'),
+    # (':\(|:\[|:\|', 'bad bad'),
+    # ('\d+.\d+|\d+|\d+th', 'number'),
+    # ('/^\d*\.?\d*$/', 'number'),
+    # ('/^\d*\-?\d*$/', 'number'),
+    # # ('@[^\s]+', 'atuser'),
+    # ("[\(\)&,.:!?`~-]+", ''),
+    # ("(?<=^|(?<=[^a-zA-Z0-9-_\.]))@([A-Za-z]+[A-Za-z0-9]+)", ''),
+    # ("#+", ''),
 ]
 
 if sys.version_info[0] > 2:  # Python 3+
@@ -26,11 +26,12 @@ else:
     def create_bound_method(func, obj):
         return types.MethodType(func, obj, obj.__class__)
 
+
 class Filter:
     tokenizer = WordPunctTokenizer()
 
     def __init__(self,
-                 tweet,
+                 tweet=None,
                  ngram_combo=[],
                  stop_words=[],
                  patterns=[],
@@ -44,8 +45,13 @@ class Filter:
         if func:
             self.word_base_method = create_bound_method(func, self)
 
-    def get_tweet(self):
+    @property
+    def tweet(self):
         return self.tweet
+
+    @tweet.setter
+    def tweet(self, tweet):
+        self.tweet = tweet
 
     def ngramize(self, o_tweet):
         ngram = []
@@ -57,12 +63,13 @@ class Filter:
 
     def regex_replace(self, tweet):
         for (pattern, replacer) in self.patterns:
-            (tweet, count) = re.subn(pattern, replacer, tweet)
+            tweet = re.sub(pattern, replacer, tweet)
+            print tweet
 
         return tweet
 
     def get_sub_tweet(self):
-        return self.regex_replace(self.get_tweet())
+        return self.regex_replace(self.tweet)
 
     def tokenize(self):
         """
@@ -78,14 +85,14 @@ class Filter:
     def word_base_method(self):
         return self.tokenize()
 
-    def __call__(self):
+    def __call__(self, tweet):
         """
         :return: a list of n-grams
         """
+        self.tweet = tweet
         if len(self.ngram_combo) == 1 and sorted(self.ngram_combo)[0] == 1:
             return self.word_base_method()
 
-        print 'this'
         return self.ngramize(" ".join(self.word_base_method()))
 
 
@@ -93,6 +100,7 @@ def lemmatize(self):
     lemma = WordNetLemmatizer()
     return [lemma.lemmatize(word)
             for word in self.tokenize()]
+
 
 def stemmatize(self):
     stemm = PorterStemmer()
@@ -104,10 +112,12 @@ if __name__ == "__main__":
     stop_words = ['the', 'a', 'is', 'this']
     tweet_ = """This is a random tweet, the 123-12, #HashTags,
     @bovril, http://github.com, GOOOOOOO! LOL, we are cooking, """
+
     filter_ = Filter(tweet=tweet_,
-                     ngram_combo=[1, 2, 3],
+                     ngram_combo=[1],
                      stop_words=stop_words,
                      patterns=REGEX_PATTERNS,
                      func=stemmatize,
                      )
-    print filter_()
+    print filter_(tweet_)
+    # print filter_(tweet_2)
