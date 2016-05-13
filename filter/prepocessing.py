@@ -9,15 +9,15 @@ from nltk.util import ngrams as nltk_ngrams
 REGEX_PATTERNS = [
     ('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+',
      'url'),
-    # (':\)|:-\)|:D|:-\]', 'good good'),
-    # (':\(|:\[|:\|', 'bad bad'),
-    # ('\d+.\d+|\d+|\d+th', 'number'),
-    # ('/^\d*\.?\d*$/', 'number'),
-    # ('/^\d*\-?\d*$/', 'number'),
-    # # ('@[^\s]+', 'atuser'),
-    # ("[\(\)&,.:!?`~-]+", ''),
-    # ("(?<=^|(?<=[^a-zA-Z0-9-_\.]))@([A-Za-z]+[A-Za-z0-9]+)", ''),
-    # ("#+", ''),
+    (':\)|:-\)|:D|:-\]', 'good good'),
+    (':\(|:\[|:\|', 'bad bad'),
+    ('\d+.\d+|\d+|\d+th', 'number'),
+    ('/^\d*\.?\d*$/', 'number'),
+    ('/^\d*\-?\d*$/', 'number'),
+    ('@[^\s]+', 'atuser'),
+    ("[\(\)&,.:!?`~-]+", ''),
+    ("(?<=^|(?<=[^a-zA-Z0-9-_\.]))@([A-Za-z]+[A-Za-z0-9]+)", ''),
+    ("#+", ''),
 ]
 
 if sys.version_info[0] > 2:  # Python 3+
@@ -64,7 +64,6 @@ class Filter:
     def regex_replace(self, tweet):
         for (pattern, replacer) in self.patterns:
             tweet = re.sub(pattern, replacer, tweet)
-            print tweet
 
         return tweet
 
